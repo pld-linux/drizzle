@@ -11,6 +11,8 @@ BuildRequires:	autoconf
 BuildRequires:	automake
 BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
+BuildRequires:	protobuf
+BuildRequires:	protobuf-devel
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -24,16 +26,15 @@ The project is focused on making a database that is:
 - Fast and scalable on modern architecture
 - Simply design for ease of installation and management
 
-
 %prep
 %setup -q -n %{name}
-%{__libtoolize}
-%{__aclocal}
-%{__autoconf}
-%{__autoheader}
-%{__automake}
 
 %build
+%{__libtoolize} --automake
+%{__aclocal} -I m4
+%{__autoheader}
+%{__automake}
+%{__autoconf}
 %configure
 %{__make}
 
