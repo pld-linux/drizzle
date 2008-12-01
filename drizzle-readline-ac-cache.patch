@@ -1,0 +1,19 @@
+--- drizzle/m4/readline.m4~	2008-12-01 23:04:06.000000000 +0200
++++ drizzle/m4/readline.m4	2008-12-02 00:15:21.314639769 +0200
+@@ -33,12 +33,14 @@
+ 	    ],
+ 	    [
+ 		mysql_cv_new_rl_interface=yes
+-                AC_DEFINE_UNQUOTED([USE_NEW_READLINE_INTERFACE], [1],
+-                                   [used new readline interface (are rl_completion_func_t and rl_compentry_func_t defined)])
+ 	    ],
+ 	    [mysql_cv_new_rl_interface=no]
+         )
+     )
++    if test "$mysql_cv_new_rl_interface" = "yes"; then
++		AC_DEFINE_UNQUOTED([USE_NEW_READLINE_INTERFACE], [1],
++		[used new readline interface (are rl_completion_func_t and rl_compentry_func_t defined)])
++    fi
+   CFLAGS="${save_CFLAGS}"
+ ])
+ 
