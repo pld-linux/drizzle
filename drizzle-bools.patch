@@ -1,0 +1,15 @@
+--- drizzle/client/drizzle.cc~	2008-12-01 23:04:13.000000000 +0200
++++ drizzle/client/drizzle.cc	2008-12-02 00:31:50.368065542 +0200
+@@ -43,6 +43,12 @@
+ #include <signal.h>
+ #include <sys/ioctl.h>
+ 
++#ifndef TRUE
++#define TRUE 1
++#endif
++#ifndef FALSE
++#define FALSE 0
++#endif
+ 
+ #if defined(HAVE_LOCALE_H)
+ #include <locale.h>
