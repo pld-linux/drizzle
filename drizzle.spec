@@ -6,6 +6,7 @@ License:	GPL v2
 Group:		Applications/Databases
 Source0:	%{name}.tar.bz2
 # Source0-md5:	749e9c0d3591f6381ee84a27abafd074
+Patch0:		%{name}-ncurses.patch
 URL:		https://launchpad.net/drizzle
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -28,9 +29,11 @@ The project is focused on making a database that is:
 
 %prep
 %setup -q -n %{name}
+%patch0 -p1
 
 %build
-%{__libtoolize} --automake
+%{__gettextize}
+%{__libtoolize}
 %{__aclocal} -I m4
 %{__autoheader}
 %{__automake}
