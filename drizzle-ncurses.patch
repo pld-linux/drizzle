@@ -1,0 +1,20 @@
+--- drizzle/configure.ac~	2008-12-01 23:48:14.000000000 +0200
++++ drizzle/configure.ac	2008-12-01 23:48:28.368133506 +0200
+@@ -150,7 +150,7 @@
+ sinclude(m4/gettext.m4)
+ 
+ AM_GNU_GETTEXT([external])
+-AM_GNU_GETTEXT_VERSION(0.17)
++AM_GNU_GETTEXT_VERSION([0.17])
+ 
+ AM_CONDITIONAL([BUILD_GETTEXT],[test "x$MSGMERGE" != "x" -a "x$MSGMERGE" != "x:"])
+ 
+@@ -602,7 +602,7 @@
+ #--------------------------------------------------------------------
+ 
+ 
+-SEARCH_FOR_LIB(ncurses, tgetent, ncurses/ncurses.h, AC_MSG_ERROR(Couldn't find ncurses)) 
++SEARCH_FOR_LIB(tinfo, tgetent, ncurses/ncurses.h, AC_MSG_ERROR(Couldn't find ncurses)) 
+ 
+ #--------------------------------------------------------------------
+ # Check for libreadline or compatible (libedit on Mac OS X)
