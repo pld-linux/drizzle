@@ -1,20 +1,27 @@
---- drizzle/configure.ac~	2008-12-01 23:48:14.000000000 +0200
-+++ drizzle/configure.ac	2008-12-01 23:48:28.368133506 +0200
-@@ -150,7 +150,7 @@
- sinclude(m4/gettext.m4)
- 
- AM_GNU_GETTEXT([external])
--AM_GNU_GETTEXT_VERSION(0.17)
-+AM_GNU_GETTEXT_VERSION([0.17])
- 
- AM_CONDITIONAL([BUILD_GETTEXT],[test "x$MSGMERGE" != "x" -a "x$MSGMERGE" != "x:"])
- 
-@@ -602,7 +602,7 @@
+--- drizzle/configure.ac~	2008-12-02 01:00:23.000000000 +0200
++++ drizzle/configure.ac	2008-12-02 02:33:32.150538753 +0200
+@@ -602,7 +602,12 @@
  #--------------------------------------------------------------------
  
  
 -SEARCH_FOR_LIB(ncurses, tgetent, ncurses/ncurses.h, AC_MSG_ERROR(Couldn't find ncurses)) 
-+SEARCH_FOR_LIB(tinfo, tgetent, ncurses/ncurses.h, AC_MSG_ERROR(Couldn't find ncurses)) 
++SEARCH_FOR_LIB(ncurses, tgetent, ncurses/ncurses.h, [
++	SEARCH_FOR_LIB(tinfo, tgetent, ncurses/ncurses.h,
++		AC_MSG_ERROR([Couldn't find ncurses])
++	)
++	]
++)
  
  #--------------------------------------------------------------------
  # Check for libreadline or compatible (libedit on Mac OS X)
+--- drizzle/m4/search_for_lib.m4~	2008-12-01 23:04:08.000000000 +0200
++++ drizzle/m4/search_for_lib.m4	2008-12-02 02:33:04.107962733 +0200
+@@ -73,7 +73,7 @@
+   ])
+   AS_IF([test AS_VAR_GET([have_lib]) = no],[
+     AC_MSG_WARN([$3 or lib$1.a not found. Try installing $1 developement packages])
+-    [$4]
++    $4
+   ])
+   AC_SUBST(libs_var)
+   AC_SUBST(cflags_var)
