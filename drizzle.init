@@ -2,7 +2,7 @@
 #
 # drizzle	A Lightweight SQL Database for Cloud and Web
 #
-# chkconfig:	2345 84 25
+# chkconfig:	2345 84 16
 #
 # description:	A Microkernel DBMS for High Performance Scale-Out Applications
 #
