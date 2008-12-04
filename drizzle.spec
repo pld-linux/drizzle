@@ -1,17 +1,17 @@
 # TODO
-# - finish packaging
+# - initscript
+# - prefix bin-commands with drizzle
+# - changing paths (non-user stuff to sbindir)
+# - killing plugins versioning
 Summary:	A Lightweight SQL Database for Cloud and Web
 Name:		drizzle
 Version:	0
-Release:	0.1
+Release:	0.2
 License:	GPL v2
 Group:		Applications/Databases
 Source0:	%{name}.tar.bz2
-# Source0-md5:	749e9c0d3591f6381ee84a27abafd074
-Patch0:		%{name}-ncurses.patch
-Patch1:		%{name}-readline-ac-cache.patch
-Patch2:		%{name}-bools.patch
-Patch3:		%{name}-zlibs.patch
+# Source0-md5:	46e91981d1eecbba5d4cde3b2c87bb07
+Patch0:		%{name}-bools.patch
 URL:		https://launchpad.net/drizzle
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -59,9 +59,6 @@ necessary to develop Drizzle client applications.
 %prep
 %setup -q -n %{name}
 %patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
 
 %build
 %{__gettextize}
@@ -138,6 +135,8 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/innochecksum
 %attr(755,root,root) %{_bindir}/master_list_reader
 %attr(755,root,root) %{_bindir}/master_list_writer
+%attr(755,root,root) %{_bindir}/replication_event_reader
+%attr(755,root,root) %{_bindir}/replication_event_writer
 %attr(755,root,root) %{_bindir}/schema_reader
 %attr(755,root,root) %{_bindir}/table_reader
 %attr(755,root,root) %{_bindir}/table_writer
