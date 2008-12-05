@@ -1,20 +1,18 @@
 # TODO
 # - prefix bin-commands with drizzle
 # - changing paths (non-user stuff to sbindir)
+# - logrotate
 Summary:	A Lightweight SQL Database for Cloud and Web
 Name:		drizzle
 Version:	7.0.0
-Release:	0.8
+Release:	0.9
 License:	GPL v2
 Group:		Applications/Databases
 Source0:	%{name}.tar.bz2
-# Source0-md5:	46e91981d1eecbba5d4cde3b2c87bb07
+# Source0-md5:	540ce0f93695538759974199df03ab87
 Source1:	%{name}.init
 Source2:	%{name}d.conf
 Patch0:		%{name}-bools.patch
-Patch1:		%{name}-noinst.patch
-Patch2:		%{name}-noversion.patch
-Patch3:		%{name}-errorlog-no-rename.patch
 URL:		https://launchpad.net/drizzle
 BuildRequires:	autoconf
 BuildRequires:	automake
@@ -22,6 +20,7 @@ BuildRequires:	gettext-devel
 BuildRequires:	libevent-devel
 BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
+BuildRequires:	libuuid-devel
 BuildRequires:	pcre-devel
 BuildRequires:	protobuf
 BuildRequires:	protobuf-devel
@@ -34,6 +33,7 @@ Requires(pre):	/bin/id
 Requires(pre):	/usr/bin/getgid
 Requires(pre):	/usr/sbin/groupadd
 Requires(pre):	/usr/sbin/useradd
+Requires:	%{name}-libs = %{version}-%{release}
 Requires:	rc-scripts
 Provides:	group(drizzle)
 Provides:	user(drizzle)
@@ -77,9 +77,6 @@ necessary to develop Drizzle client applications.
 %prep
 %setup -q -n %{name}
 %patch0 -p1
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
 
 %build
 %{__gettextize}
@@ -110,6 +107,10 @@ rm -f $RPM_BUILD_ROOT%{_libdir}/drizzle/plugin/*.la
 
 # we have our own better ones
 rm -f $RPM_BUILD_ROOT%{_datadir}/drizzle/{drizzle-log-rotate,drizzle.server}
+rm -f $RPM_BUILD_ROOT%{_bindir}/drizzled_safe
+rm -f $RPM_BUILD_ROOT%{_bindir}/my_print_defaults
+rm -f $RPM_BUILD_ROOT%{_bindir}/mysql_waitpid
+
 # not useful
 rm -f $RPM_BUILD_ROOT%{_libdir}/drizzle/plugin/libhello_world.so
 
@@ -170,27 +171,25 @@ fi
 %attr(755,root,root) %{_bindir}/drizzle
 %attr(755,root,root) %{_bindir}/drizzleadmin
 %attr(755,root,root) %{_bindir}/drizzlecheck
-%attr(755,root,root) %{_bindir}/drizzled_safe
 %attr(755,root,root) %{_bindir}/drizzledump
 %attr(755,root,root) %{_bindir}/drizzledumpslow
 %attr(755,root,root) %{_bindir}/drizzleimport
 %attr(755,root,root) %{_bindir}/drizzleslap
 %attr(755,root,root) %{_bindir}/drizzletest
-%attr(755,root,root) %{_bindir}/innochecksum
 
-# likely mysql-devel collisions
-%attr(755,root,root) %{_bindir}/my_print_defaults
+# likely mysql pkg collisions
 %attr(755,root,root) %{_bindir}/myisamchk
-%attr(755,root,root) %{_bindir}/mysql_waitpid
+%attr(755,root,root) %{_bindir}/innochecksum
 
 %files devel
 %defattr(644,root,root,755)
 %{_includedir}/drizzled
 %{_includedir}/libdrizzle
-# likely mysql-devel collisions
-%{_includedir}/mystrings
-%{_includedir}/mysys
 %{_pkgconfigdir}/libdrizzle.pc
 %{_aclocaldir}/drizzle.m4
 %{_libdir}/libdrizzle.la
 %{_libdir}/libdrizzle.so
+
+# likely mysql-devel collisions
+%{_includedir}/mystrings
+%{_includedir}/mysys
