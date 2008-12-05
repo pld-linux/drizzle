@@ -1,24 +1,42 @@
 # TODO
-# - initscript
 # - prefix bin-commands with drizzle
 # - changing paths (non-user stuff to sbindir)
-# - killing plugins versioning
 Summary:	A Lightweight SQL Database for Cloud and Web
 Name:		drizzle
-Version:	0
-Release:	0.2
+Version:	7.0.0
+Release:	0.8
 License:	GPL v2
 Group:		Applications/Databases
 Source0:	%{name}.tar.bz2
 # Source0-md5:	46e91981d1eecbba5d4cde3b2c87bb07
+Source1:	%{name}.init
+Source2:	%{name}d.conf
 Patch0:		%{name}-bools.patch
+Patch1:		%{name}-noinst.patch
+Patch2:		%{name}-noversion.patch
+Patch3:		%{name}-errorlog-no-rename.patch
 URL:		https://launchpad.net/drizzle
 BuildRequires:	autoconf
 BuildRequires:	automake
+BuildRequires:	gettext-devel
+BuildRequires:	libevent-devel
 BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
+BuildRequires:	pcre-devel
 BuildRequires:	protobuf
 BuildRequires:	protobuf-devel
+BuildRequires:	readline-devel
+BuildRequires:	zlib-devel
+Requires(post,preun):	/sbin/chkconfig
+Requires(postun):	/usr/sbin/groupdel
+Requires(postun):	/usr/sbin/userdel
+Requires(pre):	/bin/id
+Requires(pre):	/usr/bin/getgid
+Requires(pre):	/usr/sbin/groupadd
+Requires(pre):	/usr/sbin/useradd
+Requires:	rc-scripts
+Provides:	group(drizzle)
+Provides:	user(drizzle)
 BuildRoot:	%{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 
 %description
@@ -59,6 +77,9 @@ necessary to develop Drizzle client applications.
 %prep
 %setup -q -n %{name}
 %patch0 -p1
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
 
 %build
 %{__gettextize}
@@ -73,11 +94,24 @@ necessary to develop Drizzle client applications.
 
 %install
 rm -rf $RPM_BUILD_ROOT
+install -d $RPM_BUILD_ROOT/etc/{rc.d/init.d,sysconfig,drizzle} \
+	   $RPM_BUILD_ROOT/var/{log/{archive,}/drizzle,lib/drizzle} \
 
 %{__make} install \
 	DESTDIR=$RPM_BUILD_ROOT
 
 %find_lang %{name}
+
+install %{SOURCE1} $RPM_BUILD_ROOT/etc/rc.d/init.d/drizzle
+cp -a %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/drizzle/drizzled.conf
+
+# am offers no way to install without .la (other than hook to rm -f)
+rm -f $RPM_BUILD_ROOT%{_libdir}/drizzle/plugin/*.la
+
+# we have our own better ones
+rm -f $RPM_BUILD_ROOT%{_datadir}/drizzle/{drizzle-log-rotate,drizzle.server}
+# not useful
+rm -f $RPM_BUILD_ROOT%{_libdir}/drizzle/plugin/libhello_world.so
 
 %clean
 rm -rf $RPM_BUILD_ROOT
@@ -85,34 +119,46 @@ rm -rf $RPM_BUILD_ROOT
 %post   libs -p /sbin/ldconfig
 %postun libs -p /sbin/ldconfig
 
+%pre
+%groupadd -g 231 drizzle
+%useradd -u 231 -d /var/lib/drizzle -s /bin/sh -g drizzle -c "Drizzle Server" drizzle
+
+%post
+/sbin/chkconfig --add drizzle
+%service drizzle restart
+
+%preun
+if [ "$1" = "0" ]; then
+	%service -q mysql drizzle
+	/sbin/chkconfig --del drizzle
+fi
+
+%postun
+if [ "$1" = "0" ]; then
+	%userremove drizzle
+	%groupremove drizzle
+fi
+
 %files
 %defattr(644,root,root,755)
 %doc AUTHORS DRIZZLE.FAQ
 %attr(755,root,root) %{_sbindir}/drizzled
+%attr(754,root,root) /etc/rc.d/init.d/drizzle
+
+%dir %{_sysconfdir}/drizzle
+%attr(640,root,root) %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/drizzle/drizzled.conf
+
 %dir %{_libdir}/drizzle
 %dir %{_libdir}/drizzle/plugin
 %attr(755,root,root) %{_libdir}/drizzle/plugin/ha_blackhole.so
-%attr(755,root,root) %{_libdir}/drizzle/plugin/ha_blackhole.so.*.*.*
-%attr(755,root,root) %{_libdir}/drizzle/plugin/ha_blackhole.so.0
 %attr(755,root,root) %{_libdir}/drizzle/plugin/libauth_pam.so
-%attr(755,root,root) %{_libdir}/drizzle/plugin/libauth_pam.so.*.*.*
-%attr(755,root,root) %{_libdir}/drizzle/plugin/libauth_pam.so.0
 %attr(755,root,root) %{_libdir}/drizzle/plugin/liberrmsg_stderr.so
-%attr(755,root,root) %{_libdir}/drizzle/plugin/liberrmsg_stderr.so.*.*.*
-%attr(755,root,root) %{_libdir}/drizzle/plugin/liberrmsg_stderr.so.0
-%attr(755,root,root) %{_libdir}/drizzle/plugin/libhello_world.so
-%attr(755,root,root) %{_libdir}/drizzle/plugin/libhello_world.so.*.*.*
-%attr(755,root,root) %{_libdir}/drizzle/plugin/libhello_world.so.0
 %attr(755,root,root) %{_libdir}/drizzle/plugin/liblogging_query.so
-%attr(755,root,root) %{_libdir}/drizzle/plugin/liblogging_query.so.*.*.*
-%attr(755,root,root) %{_libdir}/drizzle/plugin/liblogging_query.so.0
 %attr(755,root,root) %{_libdir}/drizzle/plugin/libmd5udf.so
-%attr(755,root,root) %{_libdir}/drizzle/plugin/libmd5udf.so.*.*.*
-%attr(755,root,root) %{_libdir}/drizzle/plugin/libmd5udf.so.0
 
-%dir %{_datadir}/drizzle
-%{_datadir}/drizzle/drizzle-log-rotate
-%{_datadir}/drizzle/drizzle.server
+%attr(771,root,drizzle) /var/lib/drizzle
+%attr(750,root,drizzle) %dir /var/log/drizzle
+%attr(750,root,root) %dir /var/log/archive/drizzle
 
 %files libs
 %defattr(644,root,root,755)
@@ -121,8 +167,6 @@ rm -rf $RPM_BUILD_ROOT
 
 %files client -f %{name}.lang
 %defattr(644,root,root,755)
-%attr(755,root,root) %{_bindir}/binlog_reader
-%attr(755,root,root) %{_bindir}/binlog_writer
 %attr(755,root,root) %{_bindir}/drizzle
 %attr(755,root,root) %{_bindir}/drizzleadmin
 %attr(755,root,root) %{_bindir}/drizzlecheck
@@ -133,13 +177,6 @@ rm -rf $RPM_BUILD_ROOT
 %attr(755,root,root) %{_bindir}/drizzleslap
 %attr(755,root,root) %{_bindir}/drizzletest
 %attr(755,root,root) %{_bindir}/innochecksum
-%attr(755,root,root) %{_bindir}/master_list_reader
-%attr(755,root,root) %{_bindir}/master_list_writer
-%attr(755,root,root) %{_bindir}/replication_event_reader
-%attr(755,root,root) %{_bindir}/replication_event_writer
-%attr(755,root,root) %{_bindir}/schema_reader
-%attr(755,root,root) %{_bindir}/table_reader
-%attr(755,root,root) %{_bindir}/table_writer
 
 # likely mysql-devel collisions
 %attr(755,root,root) %{_bindir}/my_print_defaults
@@ -155,11 +192,5 @@ rm -rf $RPM_BUILD_ROOT
 %{_includedir}/mysys
 %{_pkgconfigdir}/libdrizzle.pc
 %{_aclocaldir}/drizzle.m4
-%{_libdir}/drizzle/plugin/ha_blackhole.la
-%{_libdir}/drizzle/plugin/libauth_pam.la
-%{_libdir}/drizzle/plugin/liberrmsg_stderr.la
-%{_libdir}/drizzle/plugin/libhello_world.la
-%{_libdir}/drizzle/plugin/liblogging_query.la
-%{_libdir}/drizzle/plugin/libmd5udf.la
 %{_libdir}/libdrizzle.la
 %{_libdir}/libdrizzle.so
