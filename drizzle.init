@@ -47,7 +47,16 @@ stop() {
 	if [ -f /var/lock/subsys/drizzle ]; then
 		# Stop daemons.
 		msg_stopping "Drizzle Server"
-		killproc --pidfile /var/lib/drizzle/drizzle.pid drizzled -TERM
+		/sbin/start-stop-daemon -q --stop \
+			--retry TERM/600/KILL/10 \
+			-s TERM --pidfile /var/lib/drizzle/drizzle.pid
+		local result=$?
+		if [ "$result" -eq 0 ]; then
+			ok
+		else
+			fail
+		fi
+
 		rm -f /var/lock/subsys/drizzle
 	else
 		msg_not_running "Drizzle Server"
