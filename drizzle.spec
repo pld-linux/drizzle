@@ -5,11 +5,11 @@
 Summary:	A Lightweight SQL Database for Cloud and Web
 Name:		drizzle
 Version:	7.0.0
-Release:	0.9
+Release:	0.11
 License:	GPL v2
 Group:		Applications/Databases
 Source0:	%{name}.tar.bz2
-# Source0-md5:	540ce0f93695538759974199df03ab87
+# Source0-md5:	0749fa072ec090f228e940cd34bbee13
 Source1:	%{name}.init
 Source2:	%{name}d.conf
 Patch0:		%{name}-bools.patch
@@ -106,13 +106,13 @@ cp -a %{SOURCE2} $RPM_BUILD_ROOT%{_sysconfdir}/drizzle/drizzled.conf
 rm -f $RPM_BUILD_ROOT%{_libdir}/drizzle/plugin/*.la
 
 # we have our own better ones
-rm -f $RPM_BUILD_ROOT%{_datadir}/drizzle/{drizzle-log-rotate,drizzle.server}
-rm -f $RPM_BUILD_ROOT%{_bindir}/drizzled_safe
-rm -f $RPM_BUILD_ROOT%{_bindir}/my_print_defaults
-rm -f $RPM_BUILD_ROOT%{_bindir}/mysql_waitpid
+rm $RPM_BUILD_ROOT%{_datadir}/drizzle/{drizzle-log-rotate,drizzle.server}
+rm $RPM_BUILD_ROOT%{_bindir}/drizzled_safe
+rm $RPM_BUILD_ROOT%{_bindir}/my_print_defaults
+rm $RPM_BUILD_ROOT%{_bindir}/mysql_waitpid
 
 # not useful
-rm -f $RPM_BUILD_ROOT%{_libdir}/drizzle/plugin/libhello_world.so
+rm $RPM_BUILD_ROOT%{_libdir}/drizzle/plugin/libhello_world.so
 
 %clean
 rm -rf $RPM_BUILD_ROOT
