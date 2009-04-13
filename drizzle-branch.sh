@@ -3,8 +3,13 @@ set -e
 
 t=$(mktemp -d)
 p=$(basename $0 .sh)
+d=drizzle
 
-bzr clone pld-patches $t/$p
+if [ ! -d $d ]; then
+	bzr clone lp:drizzle $d
+fi
+
+bzr clone $d $t/$p
 
 # generate m4/bzr_version.m4
 cd $t/$p
