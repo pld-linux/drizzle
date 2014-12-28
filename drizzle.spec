@@ -16,7 +16,7 @@ Patch0:		%{name}-bools.patch
 URL:		https://launchpad.net/drizzle
 BuildRequires:	autoconf
 BuildRequires:	automake
-BuildRequires:	gettext-devel
+BuildRequires:	gettext-tools
 BuildRequires:	libevent-devel
 BuildRequires:	libstdc++-devel
 BuildRequires:	libtool
